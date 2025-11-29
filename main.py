@@ -1,3 +1,21 @@
+from flask import Flask
+import threading
+
+# Flask app for port binding
+app = Flask(name)
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run_flask():
+    app.run(host='0.0.0.0', port=10000)
+
+# Start Flask in separate thread
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.daemon = True
+flask_thread.start()
+#baki same 
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 import requests
 import json
