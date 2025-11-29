@@ -2,7 +2,7 @@ from flask import Flask
 import threading
 
 # Flask app for port binding
-app = Flask(name)
+app = Flask(__name__)
 
 @app.route('/')
 def home():
