@@ -19,7 +19,8 @@ from pyrogram.types import User, Message
 from config import api_id, api_hash, bot_token, auth_users, sudo_users
 import sys
 import re
-import os
+import os 
+from authorisation import auth_command, list_users
 
 bot = Client(
     "bot",
@@ -36,16 +37,43 @@ async def cancel_command(bot: Client, m: Message):
     await m.reply_text("**STOPPED**🛑🛑", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
+@bot.on_message(filters.command(["help"]))
+async def help_command(bot: Client, m: Message):
+    help_text = """
+Available Commands:
+/start - Start download process
+/auth - Authorize a user (Admin only)  
+/users - List authorized users (Admin only)
+/stop - Stop the bot
+/help - Show this help
+"""
+    await m.reply_text(help_text)
+
 @bot.on_message(filters.command(["start"]))
+async def start_command(bot: Client, m: Message):
+    user_id = m.from_user.id if m.from_user is not None else None
+    
+    if user_id not in auth_users and user_id not in sudo_users:
+        await m.reply(f"❌ You are not authorized to use this bot.\n\nAsk admin to authorize you using:\n/auth {user_id}", quote=True)
+        return
+        
+    await m.reply_text("🤖 Welcome to TXT to Video Bot!\n\nUse /kmx12 to start download process\nUse /help for all commands")
+
+# YAHAN NAYA KMX12 COMMAND ADD KARO ↓
+@bot.on_message(filters.command(["kmx12"]))
 async def account_login(bot: Client, m: Message):
     
     user_id = m.from_user.id if m.from_user is not None else None
 
     if user_id not in auth_users and user_id not in sudo_users:
-        await m.reply(f"**You Are Not Subscribed To This Bot\nContact - @Mahagoraxyz**", quote=True)
+        await m.reply(f"❌ You are not authorized to use this bot.\n\nAsk admin to authorize you using:\n/auth {user_id}", quote=True)
         return
         
-    editable = await m.reply_text(f"**Hey [{m.from_user.first_name}](tg://user?id={m.from_user.id})\nSend txt file**")
+    editable = await m.reply_text(f"Hey [{m.from_user.first_name}](tg://user?id={m.from_user.id})\nSend txt file")
+    input: Message = await bot.listen(editable.chat.id)
+    # ... baki ka same code jo tumhare pass hai
+        
+    editable = await m.reply_text(f"Hey [{m.from_user.first_name}](tg://user?id={m.from_user.id})\nSend txt file")
     input: Message = await bot.listen(editable.chat.id)
     if input.document:
         x = await input.download()
