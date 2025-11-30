@@ -5,7 +5,7 @@ import asyncio
 import os
 import requests
 import time
-import json  # YE MISSING THA ADD KARO
+import json
 from p_bar import progress_bar
 import aiohttp
 import tgcrypto
@@ -43,8 +43,8 @@ def get_video_duration(filename, max_attempts=3):
             command = [
                 'ffprobe',
                 '-v', 'error',
-                '-show_entries', 'format=duration',  # YE CHANGE KARO
-                '-of', 'default=noprint_wrappers=1:nokey=1',  # YE ADD KARO
+                '-show_entries', 'format=duration',
+                '-of', 'default=noprint_wrappers=1:nokey=1',
                 filename
             ]
 
@@ -128,6 +128,7 @@ def time_name():
     now = datetime.datetime.now()
     current_time = now.strftime("%H%M%S")
     return f"{date} {current_time}.mp4"
+
 async def download_video(url, name, raw_text2):
     try:
         output_file = f"{name}.mp4"
@@ -167,13 +168,11 @@ async def download_video(url, name, raw_text2):
         print(f"An error occurred: {e.stderr.strip()}")
         return None
         
-async def send_vid(bot: Client, m: Message, cc, filename, name):
-    generated_thumb = None
-    generated_thumb = await generate_thumbnail(filename)
-    
-    reply = await m.reply_text(f"UPLOADING » {name}")
+async def send_vid(bot: Client, m: Message, cc, filename, name, thumb):
+    reply = await m.reply_text(f"**UPLOADING » {name}**")
 
-    thumbnail = generated_thumb
+    # Use the provided thumbnail
+    thumbnail = thumb
 
     # Get duration and format it
     duration_seconds = get_video_duration(filename)
@@ -184,7 +183,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, name):
     size_mb = file_size / (1024 * 1024)
     
     # Modified caption with duration and size
-    modified_caption = f"{cc}\n\n⏰ Duration: {duration_formatted}\n💾 Size: {size_mb:.1f} MB"
+    modified_caption = f"{cc}\n\n⏰ **Duration:** {duration_formatted}\n💾 **Size:** {size_mb:.1f} MB"
 
     start_time = time.time()
 
@@ -207,7 +206,7 @@ async def send_vid(bot: Client, m: Message, cc, filename, name):
     # Cleanup
     if os.path.exists(filename):
         os.remove(filename)
-    if thumbnail and os.path.exists(thumbnail):
+    if thumbnail and os.path.exists(thumbnail) and thumbnail != "No":
         os.remove(thumbnail)
     
     await reply.delete(True)
